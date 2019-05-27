@@ -7,20 +7,23 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 
 import java.util.function.Function;
 
-public class BlockBreakEvent extends Event {
+public class BlockBreakEvent extends Event
+{
     private World world;
     private BlockPos position;
     private IBlockState newState;
     private int flags;
     private Runnable callback;
 
-    public enum BlockBreakType {
+    public enum BlockBreakType
+    {
         SET_TO_AIR, SET_STATE, SET_STATE_WITH_FLAGS, USE_CALLBACK
     }
 
     private BlockBreakType breakageType;
 
-    public BlockBreakEvent(World _world, BlockPos _position) {
+    public BlockBreakEvent(World _world, BlockPos _position)
+    {
         world = _world;
         position = _position;
         newState = null;
@@ -28,14 +31,16 @@ public class BlockBreakEvent extends Event {
         breakageType = BlockBreakType.SET_TO_AIR;
     }
 
-    public BlockBreakEvent(World _world, BlockPos _position,  IBlockState _newState) {
+    public BlockBreakEvent(World _world, BlockPos _position,  IBlockState _newState)
+    {
         world = _world;
         position = _position;
         newState = _newState;
         breakageType = BlockBreakType.SET_STATE;
     }
 
-    public BlockBreakEvent(World _world, BlockPos _position,  IBlockState _newState, int _flags) {
+    public BlockBreakEvent(World _world, BlockPos _position,  IBlockState _newState, int _flags)
+    {
         world = _world;
         position = _position;
         newState = _newState;
@@ -43,7 +48,8 @@ public class BlockBreakEvent extends Event {
         breakageType = BlockBreakType.SET_STATE_WITH_FLAGS;
     }
 
-    public BlockBreakEvent(World _world, BlockPos _position, Runnable _callback) {
+    public BlockBreakEvent(World _world, BlockPos _position, Runnable _callback)
+    {
         breakageType = BlockBreakType.USE_CALLBACK;
         callback = _callback;
         world = _world;

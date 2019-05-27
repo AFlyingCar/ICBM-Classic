@@ -7,21 +7,26 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber
-public class BlastHandler {
+public class BlastHandler
+{
     private static Predicate<Object> callback = null;
 
     public static void setCallback(Predicate<Object> _callback) { callback = _callback; }
 
     @SubscribeEvent
-    public static void onBlockBreak(BlockBreakEvent event) {
+    public static void onBlockBreak(BlockBreakEvent event)
+    {
         // If we have a callback, and that callback says not to continue, then don't bother doing anything
-        if(callback != null) {
-            if(!callback.test(event)) {
+        if(callback != null)
+        {
+            if(!callback.test(event))
+            {
                 return;
             }
         }
 
-        switch(event.getBreakageType()) {
+        switch(event.getBreakageType())
+        {
             case SET_TO_AIR:
                 // System.out.println("Set To Air");
                 event.getWorld().setBlockToAir(event.getPosition());
