@@ -1,6 +1,7 @@
 package icbm.classic.content.explosive.blast;
 
 import icbm.classic.ICBMClassic;
+import icbm.classic.api.events.BlockBreakEvent;
 import icbm.classic.content.entity.EntityFlyingBlock;
 import icbm.classic.content.explosive.thread.ThreadSmallExplosion;
 import icbm.classic.lib.PosDistanceSorter;
@@ -10,6 +11,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.*;
 
@@ -60,6 +62,9 @@ public class BlastAntiGravitational extends Blast
 
                         for (BlockPos targetPosition : results)
                         {
+
+                            // TODO: Add check for if we can modify the block at targetPosition
+
                             final IBlockState blockState = world.getBlockState(targetPosition);
                             if (blockState.getBlock() != Blocks.AIR)
                             {
@@ -68,26 +73,29 @@ public class BlastAntiGravitational extends Blast
                                 {
                                     if (world().rand.nextInt(3) > 0)
                                     {
-                                        //Remove block
-                                        world.setBlockToAir(targetPosition);
+                                    //Mark blocks taken
+                                    blocksToTake--;
+                                    if (blocksToTake <= 0)
+                                    {
+                                        break;
+                                    }
+                                    MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition,
+                                            () -> {
+                                                //Remove block
+                                                world.setBlockToAir(targetPosition);
 
-                                        //Mark blocks taken
-                                        blocksToTake--;
-                                        if (blocksToTake <= 0)
-                                        {
-                                            break;
-                                        }
 
-                                        //Create flying block
-                                        EntityFlyingBlock entity = new EntityFlyingBlock(world(), targetPosition, blockState, 0);
-                                        entity.yawChange = 50 * world().rand.nextFloat();
-                                        entity.pitchChange = 100 * world().rand.nextFloat();
-                                        entity.motionY += Math.max(0.15 * world().rand.nextFloat(), 0.1);
-                                        entity.noClip = true;
-                                        world().spawnEntity(entity);
+                                                //Create flying block
+                                                EntityFlyingBlock entity = new EntityFlyingBlock(world(), targetPosition, blockState, 0);
+                                                entity.yawChange = 50 * world().rand.nextFloat();
+                                                entity.pitchChange = 100 * world().rand.nextFloat();
+                                                entity.motionY += Math.max(0.15 * world().rand.nextFloat(), 0.1);
+                                                entity.noClip = true;
+                                                world().spawnEntity(entity);
 
-                                        //Track flying block
-                                        flyingBlocks.add(entity);
+                                                //Track flying block
+                                                flyingBlocks.add(entity);
+                                            } ));
                                     }
                                 }
                             }

@@ -1,5 +1,6 @@
 package icbm.classic.content.explosive.blast;
 
+import icbm.classic.api.events.BlockBreakEvent;
 import icbm.classic.lib.transform.vector.Location;
 import icbm.classic.client.ICBMSounds;
 import icbm.classic.content.potion.CustomPotionEffect;
@@ -17,6 +18,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Iterator;
 import java.util.List;
@@ -73,6 +75,8 @@ public class BlastEndothermic extends BlastBeam
                 ConcurrentLinkedQueue<BlockPos> list = getThreadResults();
                 for (BlockPos targetPosition : list)
                 {
+                    // TODO: Add check for if we may modify this block
+
                     double distanceFromCenter = location.distance(targetPosition);
 
                     if (distanceFromCenter > this.getBlastRadius())
@@ -95,11 +99,14 @@ public class BlastEndothermic extends BlastBeam
 
                         if (blockState.getMaterial() == Material.WATER)
                         {
-                            this.world().setBlockState(targetPosition, Blocks.ICE.getDefaultState(), 3);
+                            MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition, Blocks.ICE.getDefaultState(), 3));
+                            // this.world().setBlockState(targetPosition, Blocks.ICE.getDefaultState(), 3);
                         }
                         else if (block == Blocks.FIRE || block == Blocks.FLOWING_LAVA || block == Blocks.LAVA)
                         {
-                            this.world().setBlockState(targetPosition, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, 8), 3);
+                            MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition,
+                                                                              Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, 8), 3));
+                            // this.world().setBlockState(targetPosition, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, 8), 3);
                         }
                         else
                         {
@@ -110,11 +117,14 @@ public class BlastEndothermic extends BlastBeam
                             {
                                 if (world().rand.nextBoolean())
                                 {
-                                    this.world().setBlockState(targetPosition, Blocks.ICE.getDefaultState(), 3);
+                                    // this.world().setBlockState(targetPosition, Blocks.ICE.getDefaultState(), 3);
+                                    MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition, Blocks.ICE.getDefaultState(), 3));
                                 }
                                 else
                                 {
-                                    this.world().setBlockState(targetPosition, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, 1 + world.rand.nextInt(7)), 3);
+                                    // this.world().setBlockState(targetPosition, Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, 1 + world.rand.nextInt(7)), 3);
+                                    MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition,
+                                                                                      Blocks.SNOW_LAYER.getDefaultState().withProperty(BlockSnow.LAYERS, 1 + world.rand.nextInt(7)), 3));
                                 }
                             }
                         }

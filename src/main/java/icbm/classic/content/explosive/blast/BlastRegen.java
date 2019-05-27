@@ -35,6 +35,8 @@ public class BlastRegen extends Blast
                     IChunkGenerator generator = ((ChunkProviderServer) provider).chunkGenerator;
                     Chunk newChunk = generator.generateChunk(oldChunk.x, oldChunk.z);
 
+                    // TODO: Check if newChunk can be modified here
+
                     for (int x = 0; x < 16; x++)
                     {
                         for (int z = 0; z < 16; z++)

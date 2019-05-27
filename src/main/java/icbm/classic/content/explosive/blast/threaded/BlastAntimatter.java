@@ -1,5 +1,6 @@
 package icbm.classic.content.explosive.blast.threaded;
 
+import icbm.classic.api.events.BlockBreakEvent;
 import icbm.classic.client.ICBMSounds;
 import icbm.classic.content.entity.EntityExplosion;
 import icbm.classic.content.explosive.blast.BlastRedmatter;
@@ -7,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.List;
 
@@ -45,7 +47,8 @@ public class BlastAntimatter extends BlastThreaded
             {
                 if (blockState.getBlockHardness(this.world(), blockPos) >= 0 || destroyBedrock)
                 {
-                    world.setBlockToAir(blockPos);
+                    MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, blockPos));
+                    // world.setBlockToAir(blockPos);
                 }
             }
         }

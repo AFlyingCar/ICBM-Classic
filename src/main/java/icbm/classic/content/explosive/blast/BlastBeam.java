@@ -1,5 +1,6 @@
 package icbm.classic.content.explosive.blast;
 
+import icbm.classic.api.events.BlockBreakEvent;
 import icbm.classic.content.entity.EntityFlyingBlock;
 import icbm.classic.content.entity.EntityLightBeam;
 import icbm.classic.content.explosive.thread.ThreadLargeExplosion;
@@ -11,6 +12,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -77,17 +80,25 @@ public abstract class BlastBeam extends Blast
                             BlockPos blockPos = new BlockPos(location.x() + x, location.y() + y, location.z() + z);
                             IBlockState state = world.getBlockState(blockPos);
                             Block block = state.getBlock();
+
+                            // TODO: Add check for if we can modify the block at blockPos
+
                             if (block == null || block.isAir(state, world, blockPos) || state.getBlockHardness(world, blockPos) < 0)
                             {
                                 continue;
                             }
                             if (this.world().rand.nextInt(2) > 0)
                             {
-                                world.setBlockToAir(blockPos);
-                                EntityFlyingBlock entity = new EntityFlyingBlock(this.world(), blockPos, state);
-                                this.world().spawnEntity(entity);
-                                this.feiBlocks.add(entity);
-                                entity.pitchChange = 50 * this.world().rand.nextFloat();
+                                MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, blockPos,
+                                        () -> {
+                                            world.setBlockToAir(blockPos);
+                                            EntityFlyingBlock entity = new EntityFlyingBlock(this.world(), blockPos, state);
+                                            world.spawnEntity(entity);
+                                            feiBlocks.add(entity);
+                                            entity.pitchChange = 50 * this.world().rand.nextFloat();
+                                        }
+                                ));
+
                             }
                         }
                     }

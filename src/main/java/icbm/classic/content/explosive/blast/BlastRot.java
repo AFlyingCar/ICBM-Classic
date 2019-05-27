@@ -1,6 +1,7 @@
 package icbm.classic.content.explosive.blast;
 
 import icbm.classic.ICBMClassic;
+import icbm.classic.api.events.BlockBreakEvent;
 import icbm.classic.config.ConfigDebug;
 import icbm.classic.content.explosive.thread.ThreadLargeExplosion;
 import net.minecraft.block.Block;
@@ -10,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.FluidRegistry;
 
 import java.util.Iterator;
@@ -62,11 +64,14 @@ public class BlastRot extends Blast
                             IBlockState blockState = world.getBlockState(targetPosition);
                             Block block = blockState.getBlock();
 
+                            // TODO: Check if we are allowed to modify the block at the given location
+
                             if (block == Blocks.GRASS || block == Blocks.SAND)
                             {
                                 if (this.world().rand.nextFloat() > 0.96)
                                 {
-                                    world.setBlockState(targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3);
+                                    MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3));
+                                    // world.setBlockState(targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3);
                                 }
                             }
 
@@ -74,17 +79,20 @@ public class BlastRot extends Blast
                             {
                                 if (this.world().rand.nextFloat() > 0.99)
                                 {
-                                    world.setBlockState(targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3);
+                                    MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3));
+                                    // world.setBlockState(targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3);
                                 }
                             }
 
                             else if (blockState.getMaterial() == Material.LEAVES || blockState.getMaterial() == Material.PLANTS)
                             {
-                                world.setBlockToAir(targetPosition);
+                                MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition));
+                                // world.setBlockToAir(targetPosition);
                             }
                             else if (block == Blocks.FARMLAND)
                             {
-                                world.setBlockState(targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3);
+                                MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3));
+                                // world.setBlockState(targetPosition, ICBMClassic.blockRadioactive.getDefaultState(), 3);
                             }
                             else if (blockState.getMaterial() == Material.WATER)
                             {
@@ -93,7 +101,8 @@ public class BlastRot extends Blast
                                     Block blockToxic = FluidRegistry.getFluid("toxicwaste").getBlock();
                                     if (blockToxic != null)
                                     {
-                                        world.setBlockState(targetPosition, blockToxic.getDefaultState(), 3);
+                                        MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition, blockToxic.getDefaultState(), 3));
+                                        // world.setBlockState(targetPosition, blockToxic.getDefaultState(), 3);
                                     }
                                 }
                             }

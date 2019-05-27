@@ -1,6 +1,7 @@
 package icbm.classic.content.explosive.blast;
 
 import icbm.classic.ICBMClassic;
+import icbm.classic.api.events.BlockBreakEvent;
 import icbm.classic.api.explosion.IMissile;
 import icbm.classic.client.ICBMSounds;
 import icbm.classic.config.ConfigDebug;
@@ -15,6 +16,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.Iterator;
 import java.util.List;
@@ -105,6 +107,8 @@ public class BlastSonic extends Blast
                             BlockPos targetPosition = it.next();
                             double distance = location.distance(targetPosition);
 
+                            // TODO: Add check for if targetPosition can be modified
+
                             if (distance > r || distance < r - 3)
                             {
                                 continue;
@@ -120,22 +124,22 @@ public class BlastSonic extends Blast
 
                             if (distance < r - 1 || this.world().rand.nextInt(3) > 0)
                             {
-                                if (block == ICBMClassic.blockExplosive)
-                                {
-                                    BlockExplosive.triggerExplosive(this.world(), targetPosition, ((TileEntityExplosive) this.world().getTileEntity(targetPosition)).explosive, 1);
-                                }
-                                else
-                                {
-                                    this.world().setBlockToAir(targetPosition);
-                                }
+                                final int curr_r = r;
+                                MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition,
+                                        () -> {
+                                            if (block == ICBMClassic.blockExplosive) {
+                                                BlockExplosive.triggerExplosive(this.world(), targetPosition, ((TileEntityExplosive) this.world().getTileEntity(targetPosition)).explosive, 1);
+                                            } else {
+                                                this.world().setBlockToAir(targetPosition);
+                                            }
 
-                                if (this.world().rand.nextFloat() < 0.3 * (this.getBlastRadius() - r))
-                                {
-                                    EntityFlyingBlock entity = new EntityFlyingBlock(this.world(), targetPosition, blockState);
-                                    this.world().spawnEntity(entity);
-                                    entity.yawChange = 50 * this.world().rand.nextFloat();
-                                    entity.pitchChange = 100 * this.world().rand.nextFloat();
-                                }
+                                            if (this.world().rand.nextFloat() < 0.3 * (this.getBlastRadius() - curr_r)) {
+                                                EntityFlyingBlock entity = new EntityFlyingBlock(this.world(), targetPosition, blockState);
+                                                this.world().spawnEntity(entity);
+                                                entity.yawChange = 50 * this.world().rand.nextFloat();
+                                                entity.pitchChange = 100 * this.world().rand.nextFloat();
+                                            }
+                                        }));
 
                                 it.remove();
                             }

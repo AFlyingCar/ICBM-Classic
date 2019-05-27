@@ -1,5 +1,6 @@
 package icbm.classic.content.explosive.blast;
 
+import icbm.classic.api.events.BlockBreakEvent;
 import icbm.classic.client.ICBMSounds;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -7,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 public class BlastFire extends Blast
 {
@@ -63,13 +65,17 @@ public class BlastFire extends Blast
                                     {
                                         boolean canReplace = block.isReplaceable(world(), targetPosition) || block.isAir(blockState, world(), targetPosition);
 
+                                        // TODO: Check that we can add FIRE at targetPosition
+
                                         if (canReplace && Blocks.FIRE.canPlaceBlockAt(world(), targetPosition))
                                         {
-                                            world.setBlockState(targetPosition, Blocks.FIRE.getDefaultState(), 3);
+                                            MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition, Blocks.FIRE.getDefaultState(), 3));
+                                            // world.setBlockState(targetPosition, Blocks.FIRE.getDefaultState(), 3);
                                         }
                                         else if (block == Blocks.ICE)
                                         {
-                                            world.setBlockToAir(targetPosition);
+                                            MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(world, targetPosition));
+                                            // world.setBlockToAir(targetPosition);
                                         }
                                     }
                                 }
