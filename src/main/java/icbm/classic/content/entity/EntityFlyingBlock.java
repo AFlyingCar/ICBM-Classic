@@ -17,6 +17,9 @@ import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 
+import icbm.classic.api.events.BlockBreakEvent;
+import net.minecraftforge.common.MinecraftForge;
+
 /** @author Calclavia */
 public class EntityFlyingBlock extends Entity implements IEntityAdditionalSpawnData
 {
@@ -158,7 +161,9 @@ public class EntityFlyingBlock extends Entity implements IEntityAdditionalSpawnD
             int j = MathHelper.floor(posY);
             int k = MathHelper.floor(posZ);
 
-            this.world.setBlockState(new BlockPos(i, j, k), getBlockState(), 2);
+            // this.world.setBlockState(new BlockPos(i, j, k), getBlockState(), 2);
+
+            MinecraftForge.EVENT_BUS.post(new BlockBreakEvent(this.world, new BlockPos(i, j, k), getBlockState(), 2, true));
         }
 
         this.setDead();
