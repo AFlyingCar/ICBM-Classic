@@ -9,11 +9,12 @@ import java.util.function.Function;
 
 public class BlockBreakEvent extends Event
 {
-    private World world;
-    private BlockPos position;
-    private IBlockState newState;
-    private int flags;
-    private Runnable callback;
+    private World world = null;
+    private BlockPos position = null;
+    private IBlockState newState = null;
+    private int flags = 0;
+    private Runnable callback = null;
+    private boolean placedBackDown = false;
 
     public enum BlockBreakType
     {
@@ -48,6 +49,16 @@ public class BlockBreakEvent extends Event
         breakageType = BlockBreakType.SET_STATE_WITH_FLAGS;
     }
 
+    public BlockBreakEvent(World _world, BlockPos _position,  IBlockState _newState, int _flags, boolean _placedBackDown)
+    {
+        world = _world;
+        position = _position;
+        newState = _newState;
+        flags = _flags;
+        breakageType = BlockBreakType.SET_STATE_WITH_FLAGS;
+        placedBackDown = _placedBackDown; // We are being placed back down if this constructor is called
+    }
+
     public BlockBreakEvent(World _world, BlockPos _position, Runnable _callback)
     {
         breakageType = BlockBreakType.USE_CALLBACK;
@@ -79,4 +90,6 @@ public class BlockBreakEvent extends Event
     public Runnable getCallback() {
         return callback;
     }
+
+    public boolean getPlacedBackDown() { return placedBackDown; }
 }
