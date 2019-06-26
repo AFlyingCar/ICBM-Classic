@@ -111,6 +111,10 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
         // Make the missile persistent
         // func_110163_bv();
+
+        // Create the object regardless, so that other code can depend on it
+        //   existing.
+        targetChunks = new LinkedList<Chunk>();
     }
 
     public EntityMissile(World w, double x, double y, double z, float yaw, float pitch, float speed)
@@ -123,6 +127,10 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
         // Make the missile persistent
         // func_110163_bv();
+
+        // Create the object regardless, so that other code can depend on it
+        //   existing.
+        targetChunks = new LinkedList<Chunk>();
     }
 
     public EntityMissile(EntityLivingBase entity)
@@ -136,6 +144,10 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
         // Make the missile persistent
         // func_110163_bv();
+
+        // Create the object regardless, so that other code can depend on it
+        //   existing.
+        targetChunks = new LinkedList<Chunk>();
     }
 
     @Override
@@ -223,7 +235,6 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         //  list
         if(!this.world.isRemote && targetPos != null) {
             // TODO: We should clear this list every time, not re-create it
-            targetChunks = new LinkedList<Chunk>();
             // TODO: I think we need a BlockPos, not whatever targetPos is
             // Get the initial chunk (the target), this one at least, _has_ to be loaded
             targetChunks.add(this.world.getChunk(this.targetPos.toBlockPos()));
