@@ -27,8 +27,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -37,6 +40,7 @@ import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.List;
 
 /** @Author - Calclavia */
 public class EntityMissile extends EntityProjectile implements IEntityAdditionalSpawnData, IExplosiveContainer, IMissile
@@ -95,6 +99,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
     public int preLaunchSmokeTimer = maxPreLaunchSmokeTimer;
     public int launcherHasAirBelow = -1;
 
+    public List<Chunk> targetChunks;
 
     public EntityMissile(World w)
     {
@@ -103,6 +108,9 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         this.inAirKillTime = 144000 /* 2 hours */;
         this.isImmuneToFire = true;
         this.ignoreFrustumCheck = true;
+
+        // Make the missile persistent
+        // func_110163_bv();
     }
 
     public EntityMissile(World w, double x, double y, double z, float yaw, float pitch, float speed)
@@ -112,6 +120,9 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         this.inAirKillTime = 144000 /* 2 hours */;
         this.isImmuneToFire = true;
         this.ignoreFrustumCheck = true;
+
+        // Make the missile persistent
+        // func_110163_bv();
     }
 
     public EntityMissile(EntityLivingBase entity)
@@ -122,6 +133,9 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         this.inAirKillTime = 144000 /* 2 hours */;
         this.isImmuneToFire = true;
         this.ignoreFrustumCheck = true;
+
+        // Make the missile persistent
+        // func_110163_bv();
     }
 
     @Override
@@ -201,6 +215,27 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         if (explosiveID != null && explosiveID.handler instanceof Explosion)
         {
             ((Explosion) explosiveID.handler).launch(this);
+        }
+
+        // Don't do the chunk loading on the client side, only server
+        // Also, if there is no target position, then we won't be able to load
+        //  any chunks there, so don't bother even trying to get a targetchunks
+        //  list
+        if(!this.world.isRemote && targetPos != null) {
+            // TODO: We should clear this list every time, not re-create it
+            targetChunks = new LinkedList<Chunk>();
+            // TODO: I think we need a BlockPos, not whatever targetPos is
+            // Get the initial chunk (the target), this one at least, _has_ to be loaded
+            targetChunks.add(this.world.getChunk(this.targetPos.toBlockPos()));
+
+            ChunkPos centerChunkPos = targetChunks.get(0).getPos();
+
+            // TODO: populate targetChunks with all chunks in some configurable radius around centerChunkPos
+
+            // If we don't get the ticket, then we'll just try to continue wi
+            if(!ICBMClassic.requestTicketForWorld(this.world)) {
+                System.err.println("Failed to get a chunk loader ticket. Continuing with legacy behavior.");
+            }
         }
 
         //Trigger code
@@ -299,6 +334,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
         if (!this.world.isRemote)
         {
+            ICBMClassic.requestForcedChunkLoading(this.world, this.targetChunks);
 
             if (preLaunchSmokeTimer <= 0 || this.missileType != MissileFlightType.PAD_LAUNCHER)
             {
@@ -672,6 +708,8 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
             entityItem.motionY = ((float) random.nextGaussian() * var13 + 0.2F);
             entityItem.motionZ = ((float) random.nextGaussian() * var13);
             this.world.spawnEntity(entityItem);
+
+            ICBMClassic.requestStopForcedChunkLoading(this.world, this.targetChunks);
         }
 
         this.setDead();
@@ -735,6 +773,11 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
     public NBTTagCompound getExplosiveData()
     {
         return this.nbtData;
+    }
+
+    public List<Chunk> getTargetChunks()
+    {
+        return this.targetChunks;
     }
 
 }
