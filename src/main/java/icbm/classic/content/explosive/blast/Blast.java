@@ -8,6 +8,7 @@ import icbm.classic.config.ConfigDebug;
 import icbm.classic.content.entity.EntityExplosion;
 import icbm.classic.content.explosive.ExplosiveHandler;
 import icbm.classic.content.explosive.thread.ThreadExplosion;
+import icbm.classic.content.missile.EntityMissile;
 import icbm.classic.lib.transform.vector.Location;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -60,6 +61,8 @@ public abstract class Blast extends Explosion implements IBlast
 
     private boolean preExplode = false;
 
+    private EntityMissile missileEntity = null;
+
     /**
      * Only use the default if you plan to init required data
      */
@@ -73,18 +76,27 @@ public abstract class Blast extends Explosion implements IBlast
     {
         super(world, entity, x, y, z, size, false, true);
         this.location = new Location(world, x, y, z);
+
+        if(entity instanceof EntityMissile)
+            missileEntity = (EntityMissile)entity;
     }
 
     public Blast(Location pos, Entity entity, float size)
     {
         super(pos.world(), entity, pos.x(), pos.y(), pos.z(), size, false, true);
         this.location = pos;
+
+        if(entity instanceof EntityMissile)
+            missileEntity = (EntityMissile)entity;
     }
 
     public Blast(Entity entity, float size)
     {
         super(entity.world, entity, entity.posX, entity.posY, entity.posZ, size, false, true);
         this.location = new Location(entity);
+
+        if(entity instanceof EntityMissile)
+            missileEntity = (EntityMissile)entity;
     }
 
     /**
@@ -164,6 +176,9 @@ public abstract class Blast extends Explosion implements IBlast
 
             //Run post code
             this.doPostExplode();
+
+            if(this.missileEntity != null)
+                ICBMClassic.requestStopForcedChunkLoading(world, this.missileEntity.getTargetChunks());
         }
     }
 
