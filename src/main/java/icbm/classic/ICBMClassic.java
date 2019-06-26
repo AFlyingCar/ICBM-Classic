@@ -65,11 +65,13 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.*;
@@ -86,6 +88,8 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Mod class for ICBM Classic, contains all loading code and references to objects crated by the mod.
@@ -179,6 +183,9 @@ public final class ICBMClassic
     public static ItemCrafting itemPlate;
     public static ItemCrafting itemCircuit;
     public static ItemCrafting itemWire;
+
+    // MinecraftForge Chunk Loading ticket
+    public static Map<World, ForgeChunkManager.Ticket> chunkLoadingTickets;
 
     public static final ContagiousPoison poisonous_potion = new ContagiousPoison("Chemical", 0, false);
     public static final ContagiousPoison contagios_potion = new ContagiousPoison("Contagious", 1, true);
@@ -438,6 +445,17 @@ public final class ICBMClassic
         OreDictionary.registerOre("dustSulfur", new ItemStack(itemSulfurDust));
         OreDictionary.registerOre("dustSaltpeter", new ItemStack(itemSaltpeterDust));
 
+        // TODO: Should we not be doing this only on the server-side?
+        ForgeChunkManager.setForcedChunkLoadingCallback(INSTANCE,
+                    new ForgeChunkManager.LoadingCallback()
+                    {
+                        @Override
+                        public void ticketsLoaded(List<ForgeChunkManager.Ticket> tickets, World world)
+                        {
+                            // TODO: Do we want to do anything here?
+                        }
+                    });
+
         /** Potion Effects */ //TODO move to effect system
         PoisonToxin.INSTANCE = MobEffects.POISON;//new PoisonToxin(true, 5149489, "toxin");
         PoisonContagion.INSTANCE = MobEffects.POISON;//new PoisonContagion(false, 5149489, "virus");
@@ -589,6 +607,100 @@ public final class ICBMClassic
     public void serverStarting(FMLServerStoppingEvent event)
     {
         WorkerThreadManager.INSTANCE.killThreads();
+    }
+
+    public static boolean requestTicketForWorld(World world)
+    {
+        // Make sure that the mapping exists
+        if(chunkLoadingTickets == null)
+            chunkLoadingTickets = new HashMap<World, ForgeChunkManager.Ticket>();
+
+        // Request a new ticket if we don't have one for this world, or if we
+        //   somehow have a null ticket.
+        if(!chunkLoadingTickets.containsKey(world) ||
+           chunkLoadingTickets.get(world) != null)
+            chunkLoadingTickets.put(world, ForgeChunkManager.requestTicket(INSTANCE, world, ForgeChunkManager.Type.ENTITY));
+
+        // Return true if we successfully got a ticket (or if we already had one
+        return chunkLoadingTickets.get(world) != null;
+    }
+
+    public static ForgeChunkManager.Ticket getTicketForWorld(World world)
+    {
+        // Make sure that we absolutely _have_ the ticket first before we try
+        //   to use it (though we may still not have it, if the ForgeChunkManager
+        //   decides to not give us one).
+        if(requestTicketForWorld(world))
+            return chunkLoadingTickets.get(world);
+        else
+            return null;
+    }
+
+    // TODO: We should probably handle world unloading events so that we know
+    //   if our tickets will even work
+
+    // Return true if we successfully forced the loading of all chunks, false
+    //   otherwise
+    public static boolean requestForcedChunkLoading(World world, List<Chunk> chunks)
+    {
+        // What are you doing? We can't do this one the client!
+        if(!world.isRemote) return false;
+
+        ForgeChunkManager.Ticket ticket = getTicketForWorld(world);
+
+        // Make sure we don't try to force-load chunks with a null ticket.
+        if(ticket == null)
+        {
+            System.err.println("Ticket for world is null! Cannot request MCF to force load " + chunks.size() + " chunks.");
+            return false;
+        }
+
+        boolean r = true;
+        for(Chunk chunk : chunks)
+        {
+            if(chunk != null)
+            {
+                ForgeChunkManager.forceChunk(ticket, chunk.getPos());
+            }
+            else
+            {
+                System.err.println("WARNING! Cannot force a null chunk to be force-loaded.");
+                r = false;
+            }
+        }
+
+        return r;
+    }
+
+    public static boolean requestStopForcedChunkLoading(World world, List<Chunk> chunks)
+    {
+        // What are you doing? We can't do this one the client!
+        if(!world.isRemote) return false;
+
+        ForgeChunkManager.Ticket ticket = getTicketForWorld(world);
+
+        // Make sure we don't try to unforce-load chunks with a null ticket.
+        if(ticket == null)
+        {
+            System.err.println("Ticket for world is null! Cannot request MCF to unforce loading of " + chunks.size() + " chunks.");
+            return false;
+        }
+
+        boolean r = true;
+        for(Chunk chunk : chunks)
+        {
+            if(chunk != null)
+            {
+                ForgeChunkManager.unforceChunk(ticket, chunk.getPos());
+            }
+            else
+            {
+                System.err.println("WARNING! Cannot force a null chunk to be unforce-loaded.");
+                r = false;
+            }
+        }
+
+        return r;
     }
 
     public static Logger logger()
