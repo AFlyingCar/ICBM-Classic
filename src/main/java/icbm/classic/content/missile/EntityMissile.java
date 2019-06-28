@@ -6,6 +6,7 @@ import icbm.classic.api.caps.IEMPReceiver;
 import icbm.classic.api.explosion.IExplosiveContainer;
 import icbm.classic.api.explosion.ILauncherContainer;
 import icbm.classic.api.explosion.IMissile;
+import icbm.classic.client.ICBMSounds;
 import icbm.classic.config.ConfigDebug;
 import icbm.classic.config.ConfigMissile;
 import icbm.classic.content.explosive.Explosive;
@@ -254,7 +255,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         this.updateMotion();
 
         //Play audio
-        //this.world.playSound(posX, posY, posZ, ICBMClassic.PREFIX + "missilelaunch", 4F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
+        ICBMSounds.MISSILE_LAUNCH.play(this.world, posX, posY, posZ, 4F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F, false);
 
         //Trigger events
         // TODO add an event system here
