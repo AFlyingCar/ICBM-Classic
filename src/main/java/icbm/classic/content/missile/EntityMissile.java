@@ -393,10 +393,16 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
                         Pos next_position = getPredictedPosition(MAX_TICKS_TO_PREDICT);
                         Chunk next_chunk = this.world.getChunk(next_position.toBlockPos());
                         if(flyingChunks.isEmpty() || !next_chunk.getPos().equals(flyingChunks.get(0).getPos()))
+                        {
                             flyingChunks.add(0, next_chunk);
+                            ICBMClassic.requestForcedChunkLoading(this.world, next_chunk);
+                        }
 
                         if(flyingChunks.size() > MAX_FLYING_CHUNK_BUFFER)
-                            flyingChunks.remove(flyingChunks.size() - 1);
+                        {
+                            Chunk old_chunk = flyingChunks.remove(flyingChunks.size() - 1);
+                            ICBMClassic.requestStopForcedChunkLoading(this.world, old_chunk);
+                        }
 
                         //Simulate missile
                         if (shouldSimulate())
@@ -674,6 +680,9 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         if (!world.isRemote)
         {
             RadarRegistry.remove(this);
+
+            ICBMClassic.requestStopForcedChunkLoading(this.world, this.targetChunks);
+            ICBMClassic.requestStopForcedChunkLoading(this.world, this.flyingChunks);
         }
 
         super.setDead();
@@ -736,8 +745,6 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
             entityItem.motionY = ((float) random.nextGaussian() * var13 + 0.2F);
             entityItem.motionZ = ((float) random.nextGaussian() * var13);
             this.world.spawnEntity(entityItem);
-
-            ICBMClassic.requestStopForcedChunkLoading(this.world, this.targetChunks);
         }
 
         this.setDead();
