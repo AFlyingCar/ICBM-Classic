@@ -643,6 +643,16 @@ public final class ICBMClassic
     //   otherwise
     public static boolean requestForcedChunkLoading(World world, List<Chunk> chunks)
     {
+        boolean r = true;
+        for(Chunk chunk : chunks)
+        {
+            r |= requestForcedChunkLoading(world, chunk);
+        }
+
+        return r;
+    }
+
+    public static boolean requestForcedChunkLoading(World world, Chunk chunk) {
         // What are you doing? We can't do this one the client!
         if(!world.isRemote) return false;
 
@@ -651,28 +661,32 @@ public final class ICBMClassic
         // Make sure we don't try to force-load chunks with a null ticket.
         if(ticket == null)
         {
-            System.err.println("Ticket for world is null! Cannot request MCF to force load " + chunks.size() + " chunks.");
+            System.err.println("Ticket for world is null! Cannot request MCF to force load chunk " + chunk.getPos());
             return false;
         }
 
+        if(chunk != null)
+        {
+            ForgeChunkManager.forceChunk(ticket, chunk.getPos());
+            return true;
+        }
+
+        System.err.println("WARNING! Cannot force a null chunk to be force-loaded.");
+        return false;
+    }
+
+    public static boolean requestStopForcedChunkLoading(World world, List<Chunk> chunks)
+    {
         boolean r = true;
         for(Chunk chunk : chunks)
         {
-            if(chunk != null)
-            {
-                ForgeChunkManager.forceChunk(ticket, chunk.getPos());
-            }
-            else
-            {
-                System.err.println("WARNING! Cannot force a null chunk to be force-loaded.");
-                r = false;
-            }
+            r |= requestStopForcedChunkLoading(world, chunk);
         }
 
         return r;
     }
 
-    public static boolean requestStopForcedChunkLoading(World world, List<Chunk> chunks)
+    public static boolean requestStopForcedChunkLoading(World world, Chunk chunk)
     {
         // What are you doing? We can't do this one the client!
         if(!world.isRemote) return false;
@@ -682,25 +696,18 @@ public final class ICBMClassic
         // Make sure we don't try to unforce-load chunks with a null ticket.
         if(ticket == null)
         {
-            System.err.println("Ticket for world is null! Cannot request MCF to unforce loading of " + chunks.size() + " chunks.");
+            System.err.println("Ticket for world is null! Cannot request MCF to unforce loading of chunk " + chunk.getPos());
             return false;
         }
 
-        boolean r = true;
-        for(Chunk chunk : chunks)
+        if(chunk != null)
         {
-            if(chunk != null)
-            {
-                ForgeChunkManager.unforceChunk(ticket, chunk.getPos());
-            }
-            else
-            {
-                System.err.println("WARNING! Cannot force a null chunk to be unforce-loaded.");
-                r = false;
-            }
+            ForgeChunkManager.unforceChunk(ticket, chunk.getPos());
+            return true;
         }
 
-        return r;
+        System.err.println("WARNING! Cannot force a null chunk to be unforce-loaded.");
+        return false;
     }
 
     public static Logger logger()
