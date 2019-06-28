@@ -28,6 +28,7 @@ public enum ICBMSounds
     DEBILITATION("debilitation"),
     EMP("emp"),
     EXPLOSION("explosion"),
+    MISSILE_LAUNCH("missilelaunch"),
     EXPLOSION_FIRE("explosionfire"),
     GAS_LEAK("gasleak"),
     HYPERSONIC("hypersonic"),
