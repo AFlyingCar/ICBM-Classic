@@ -42,11 +42,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.List;
+import java.util.Deque;
 
 /** @Author - Calclavia */
 public class EntityMissile extends EntityProjectile implements IEntityAdditionalSpawnData, IExplosiveContainer, IMissile
 {
     public static final float MISSILE_SPEED = 2;
+    public static final int MAX_TICKS_TO_PREDICT = 10;
+    public static final int MAX_FLYING_CHUNK_BUFFER = 6;
+
     public Explosives explosiveID = Explosives.CONDENSED;
     public int maxHeight = 200;
     public Pos targetPos = null;
@@ -101,6 +105,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
     public int launcherHasAirBelow = -1;
 
     public List<Chunk> targetChunks;
+    public List<Chunk> flyingChunks; // The chunks we are currently flying in
 
     public EntityMissile(World w)
     {
@@ -116,6 +121,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         // Create the object regardless, so that other code can depend on it
         //   existing.
         targetChunks = new LinkedList<Chunk>();
+        flyingChunks = new LinkedList<Chunk>();
     }
 
     public EntityMissile(World w, double x, double y, double z, float yaw, float pitch, float speed)
@@ -132,6 +138,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         // Create the object regardless, so that other code can depend on it
         //   existing.
         targetChunks = new LinkedList<Chunk>();
+        flyingChunks = new LinkedList<Chunk>();
     }
 
     public EntityMissile(EntityLivingBase entity)
@@ -149,6 +156,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         // Create the object regardless, so that other code can depend on it
         //   existing.
         targetChunks = new LinkedList<Chunk>();
+        flyingChunks = new LinkedList<Chunk>();
     }
 
     @Override
@@ -381,6 +389,14 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
                             // Look at the next point
                             this.rotationYaw = (float) (Math.atan2(this.motionX, this.motionZ) * 180 / Math.PI);
                         }
+
+                        Pos next_position = getPredictedPosition(MAX_TICKS_TO_PREDICT);
+                        Chunk next_chunk = this.world.getChunk(next_position.toBlockPos());
+                        if(flyingChunks.isEmpty() || !next_chunk.getPos().equals(flyingChunks.get(0).getPos()))
+                            flyingChunks.add(0, next_chunk);
+
+                        if(flyingChunks.size() > MAX_FLYING_CHUNK_BUFFER)
+                            flyingChunks.remove(flyingChunks.size() - 1);
 
                         //Simulate missile
                         if (shouldSimulate())
