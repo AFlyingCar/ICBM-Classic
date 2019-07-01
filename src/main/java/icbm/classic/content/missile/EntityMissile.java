@@ -42,7 +42,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.List;
-import java.util.Deque;
+import java.util.Set;
+import java.util.HashSet;
 
 /** @Author - Calclavia */
 public class EntityMissile extends EntityProjectile implements IEntityAdditionalSpawnData, IExplosiveContainer, IMissile
@@ -104,7 +105,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
     public int preLaunchSmokeTimer = maxPreLaunchSmokeTimer;
     public int launcherHasAirBelow = -1;
 
-    public List<Chunk> targetChunks;
+    public Set<Chunk> targetChunks;
     public List<Chunk> flyingChunks; // The chunks we are currently flying in
 
     public EntityMissile(World w)
@@ -120,7 +121,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
         // Create the object regardless, so that other code can depend on it
         //   existing.
-        targetChunks = new LinkedList<Chunk>();
+        targetChunks = new HashSet<Chunk>();
         flyingChunks = new LinkedList<Chunk>();
     }
 
@@ -137,7 +138,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
         // Create the object regardless, so that other code can depend on it
         //   existing.
-        targetChunks = new LinkedList<Chunk>();
+        targetChunks = new HashSet<Chunk>();
         flyingChunks = new LinkedList<Chunk>();
     }
 
@@ -155,7 +156,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
         // Create the object regardless, so that other code can depend on it
         //   existing.
-        targetChunks = new LinkedList<Chunk>();
+        targetChunks = new HashSet<Chunk>();
         flyingChunks = new LinkedList<Chunk>();
     }
 
@@ -242,18 +243,58 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         // Also, if there is no target position, then we won't be able to load
         //  any chunks there, so don't bother even trying to get a targetchunks
         //  list
-        if(!this.world.isRemote && targetPos != null) {
+        if(!this.world.isRemote && targetPos != null)
+        {
             // TODO: We should clear this list every time, not re-create it
             // TODO: I think we need a BlockPos, not whatever targetPos is
             // Get the initial chunk (the target), this one at least, _has_ to be loaded
-            targetChunks.add(this.world.getChunk(this.targetPos.toBlockPos()));
 
-            ChunkPos centerChunkPos = targetChunks.get(0).getPos();
+            Chunk centerChunk = this.world.getChunk(this.targetPos.toBlockPos());
+            targetChunks.add(centerChunk);
+            ChunkPos centerChunkPos = centerChunk.getPos();
 
-            // TODO: populate targetChunks with all chunks in some configurable radius around centerChunkPos
+            // populate targetChunks with all chunks in a configurable radius around centerChunkPos
+            //  Populated with the Midpoint Circle Algorithm
+            int x = ConfigMissile.MISSILE_CHUNKLOAD_RADIUS;
+            int z = 0;
+            int e = 0;
 
-            // If we don't get the ticket, then we'll just try to continue wi
-            if(!ICBMClassic.requestTicketForWorld(this.world)) {
+            while(x >= z)
+            {
+                targetChunks.add(this.world.getChunk(centerChunkPos.x + x,
+                                                     centerChunkPos.z + z));
+                targetChunks.add(this.world.getChunk(centerChunkPos.x + z,
+                                                     centerChunkPos.z + x));
+                targetChunks.add(this.world.getChunk(centerChunkPos.x - x,
+                                                     centerChunkPos.z + z));
+                targetChunks.add(this.world.getChunk(centerChunkPos.x - z,
+                                                     centerChunkPos.z + x));
+
+                targetChunks.add(this.world.getChunk(centerChunkPos.x - x,
+                                                     centerChunkPos.z - z));
+                targetChunks.add(this.world.getChunk(centerChunkPos.x - z,
+                                                     centerChunkPos.z - x));
+                targetChunks.add(this.world.getChunk(centerChunkPos.x + x,
+                                                     centerChunkPos.z - z));
+                targetChunks.add(this.world.getChunk(centerChunkPos.x + z,
+                                                     centerChunkPos.z - x));
+
+                if(e <= 0)
+                {
+                    ++z;
+                    e += (2 * z) + 1;
+                }
+                else
+                {
+                    --x;
+                    e -= (2 * x) + 1;
+                }
+            }
+
+            // If we don't get the ticket, then we'll just try to continue with the old behavior of assuming
+            //  that the missile will arrive
+            if(!ICBMClassic.requestTicketForWorld(this.world))
+            {
                 System.err.println("Failed to get a chunk loader ticket. Continuing with legacy behavior.");
             }
         }
@@ -263,7 +304,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         this.updateMotion();
 
         //Play audio
-        ICBMSounds.MISSILE_LAUNCH.play(this.world, posX, posY, posZ, 4F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F, false);
+        ICBMSounds.MISSILE_LAUNCH.play(this.world, posX, posY, posZ, 4F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F, true);
 
         //Trigger events
         // TODO add an event system here
@@ -810,7 +851,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         return this.nbtData;
     }
 
-    public List<Chunk> getTargetChunks()
+    public Set<Chunk> getTargetChunks()
     {
         return this.targetChunks;
     }
