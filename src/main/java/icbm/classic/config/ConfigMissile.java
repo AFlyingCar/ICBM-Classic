@@ -34,4 +34,9 @@ public class ConfigMissile
     @Config.Comment("Height (y level) to start simulating a missile when it travels above the map")
     @Config.RangeInt(min = 1)
     public static int SIMULATION_START_HEIGHT = 300;
+
+    @Config.Name("")
+    @Config.Comment("")
+    @Config.RangeInt(min=1, max=6)
+    public static int MISSILE_CHUNKLOAD_RADIUS = 3;
 }
