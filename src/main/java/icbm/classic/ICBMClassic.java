@@ -86,6 +86,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
+import java.lang.Iterable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -641,7 +642,7 @@ public final class ICBMClassic
 
     // Return true if we successfully forced the loading of all chunks, false
     //   otherwise
-    public static boolean requestForcedChunkLoading(World world, List<Chunk> chunks)
+    public static boolean requestForcedChunkLoading(World world, Iterable<Chunk> chunks)
     {
         boolean r = true;
         for(Chunk chunk : chunks)
@@ -675,7 +676,7 @@ public final class ICBMClassic
         return false;
     }
 
-    public static boolean requestStopForcedChunkLoading(World world, List<Chunk> chunks)
+    public static boolean requestStopForcedChunkLoading(World world, Iterable<Chunk> chunks)
     {
         boolean r = true;
         for(Chunk chunk : chunks)
