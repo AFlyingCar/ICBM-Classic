@@ -73,14 +73,17 @@ public class ItemDefuser extends ItemICBMElectrical
             {
                 ((EntityBombCart) entity).killMinecart(DamageSource.GENERIC);
             }
+            else
+            {
+                // Not something we can defuse, so don't do anything
+                return false;
+            }
 
             this.discharge(itemStack, ENERGY_COST, true);
             return true;
         }
-        else
-        {
-            player.sendMessage(new TextComponentString(LanguageUtility.getLocal("message.defuser.nopower")));
-        }
+
+        player.sendMessage(new TextComponentString(LanguageUtility.getLocal("message.defuser.nopower")));
 
         return false;
     }
