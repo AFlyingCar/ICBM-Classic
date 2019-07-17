@@ -23,7 +23,15 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileEMPTower extends TilePoweredMachine implements IMultiTileHost, IPacketIDReceiver, IGuiTile, IInventoryProvider<ExternalInventory>
+import net.minecraftforge.fml.common.Optional;
+
+import li.cil.oc.api.network.SimpleComponent;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+
+@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers", striprefs = true)
+public class TileEMPTower extends TilePoweredMachine implements IMultiTileHost, IPacketIDReceiver, IGuiTile, IInventoryProvider<ExternalInventory>, SimpleComponent
 {
     // The maximum possible radius for the EMP to strike
     public static final int MAX_RADIUS = 150;
@@ -282,5 +290,92 @@ public class TileEMPTower extends TilePoweredMachine implements IMultiTileHost, 
     public Object getClientGuiElement(int ID, EntityPlayer player)
     {
         return new GuiEMPTower(player, this);
+    }
+
+    // ------------------------------------------------------------------------
+    // OpenComputers Integration Methods
+
+    @Override
+    public String getComponentName() {
+        return "emp_tower";
+    }
+
+    @Callback
+    @Optional.Method(modid = "opencomputers")
+    public Object[] greet(Context ctx, Arguments args) {
+        return new Object[] { "Hello, I am an EMP tower!" };
+    }
+
+    @Callback(doc = "function():boolean -- Fires the EMP Tower and returns true if it fired successfully.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] fire(Context ctx, Arguments args) {
+        return new Object[] { new Boolean(fire()) };
+    }
+
+    @Callback(doc = "function():boolean -- Returns true if the EMP Tower is ready to fire.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] isReady(Context ctx, Arguments args)
+    {
+        return new Object[] { new Boolean(isReady()) };
+    }
+
+    @Callback(doc = "function():number -- Returns the amount of time until the EMP Tower can fire again.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getCooldown(Context ctx, Arguments args)
+    {
+        return new Object[] { new Integer(getCooldown()) };
+    }
+
+    @Callback(doc = "function():number -- Returns the maximum amount of time that cooldown can take.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getMaxCooldown(Context ctx, Arguments args)
+    {
+        return new Object[] { new Integer(getMaxCooldown()) };
+    }
+
+    @Callback(doc = "function():number -- Returns the current EMP mode.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getEMPMode(Context ctx, Arguments args) {
+        return new Object[] { new Integer(empMode) };
+    }
+
+    @Callback(doc = "function(number):boolean -- Sets the EMP mode. Must be 1 (Missiles), 2 (Electricity), or 0 (Both)")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setEMPMode(Context ctx, Arguments args) {
+        int mode = args.checkInteger(0);
+
+        if(mode < 0 || mode > 2) {
+            return new Object[]{ false, "Mode must be 0, 1, or 2" };
+        }
+
+        empMode = (byte)mode;
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function():number -- Gets the current EMP radius.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getEMPRadius(Context ctx, Arguments args) {
+        return new Object[] { new Integer(empRadius) };
+    }
+
+    @Callback(doc = "function(number):boolean -- Sets the EMP radius.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setEMPRadius(Context ctx, Arguments args) {
+        empRadius = args.checkInteger(0);
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function():number -- Returns how charged the EMP tower is.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getChargePercentage(Context ctx, Arguments args) {
+        return new Object[] { new Float(getChargePercentage()) };
+    }
+
+    @Callback(doc = "function():number -- Returns the size of the energy buffer for the EMP tower.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getEnergyBufferSize(Context ctx, Arguments args) {
+        return new Object[] { new Integer(getEnergyBufferSize()) };
     }
 }

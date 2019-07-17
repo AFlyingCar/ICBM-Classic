@@ -25,12 +25,24 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.text.TextComponentString;
 
+import java.util.Map;
+import java.util.HashMap;
+
+import net.minecraftforge.fml.common.Optional;
+
+import li.cil.oc.api.network.SimpleComponent;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+
 /**
  * This tile entity is for the screen of the missile launcher
  *
  * @author Calclavia
  */
-public class TileLauncherScreen extends TileLauncherPrefab implements IPacketIDReceiver, ILauncherController, IEnergyBufferProvider, IInventoryProvider<ExternalInventory>
+
+@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers", striprefs = true)
+public class TileLauncherScreen extends TileLauncherPrefab implements IPacketIDReceiver, ILauncherController, IEnergyBufferProvider, IInventoryProvider<ExternalInventory>, SimpleComponent
 {
     // The missile launcher base in which this
     // screen is connected with
@@ -341,4 +353,99 @@ public class TileLauncherScreen extends TileLauncherPrefab implements IPacketIDR
             }
         }
     }
+
+    // ------------------------------------------------------------------------
+    // OpenComputers Integration Methods
+
+    @Override
+    public String getComponentName() {
+        return "launcher_screen";
+    }
+
+    @Callback(doc = "function():number -- Returns the height a launched missile will travel before curving.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getLockHeight(Context c, Arguments a) {
+        return new Object[] { new Integer(lockHeight) };
+    }
+
+    @Callback(doc = "function(number):boolean -- Sets the height a launched missile will travel before curving.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setLockHeight(Context c, Arguments a) {
+        lockHeight = (short)a.checkInteger(0);
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function():number -- Returns the launch delay, basically the reload time.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getLaunchDelay(Context c, Arguments a) {
+        return new Object[] { new Integer(launchDelay) };
+    }
+
+    @Callback(doc = "function(number):boolean -- Sets the launch delay, basically the reload time.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setLaunchDelay(Context c, Arguments a) {
+        launchDelay = a.checkInteger(0);
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function():boolean -- Returns if the launcher is able to launch.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] canLaunch(Context c, Arguments a)
+    {
+        return new Object[] { new Boolean(canLaunch()) };
+    }
+
+    @Callback(doc = "function():boolean -- Calls the missile launcher base to launch it's missile towards a targeted location.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] launch(Context c, Arguments a)
+    {
+        launch();
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function():string -- Gets the display status of the missile launcher.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getStatus(Context c, Arguments a) {
+        return new Object[] { getStatus() };
+    }
+
+    @Callback(doc = "function():number -- Gets the energy usage of the missile launcher.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getEnergyConsumption(Context c, Arguments a)
+    {
+        return new Object[] { new Integer(getEnergyConsumption()) };
+    }
+
+    @Callback(doc = "function():number -- Gets the size of the energy buffer of the missile launcher.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getEnergyBufferSize(Context c, Arguments a) {
+        return new Object[] { new Integer(getEnergyBufferSize()) };
+    }
+
+    @Callback(doc = "function():table -- Gets the target.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getTarget(Context c, Arguments a) {
+        Map m = new HashMap<String, Integer>();
+
+        Pos p = getTarget();
+
+        m.put("x", p.xi());
+        m.put("y", p.yi());
+        m.put("z", p.zi());
+
+        return new Object[] { m };
+    }
+
+    @Callback(doc = "function(table):boolean -- Sets the target.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setTarget(Context c, Arguments a) {
+        Map m = a.checkTable(0);
+        setTarget(new Pos((double)m.get("x"), (double)m.get("y"), (double)m.get("z")));
+
+        return new Object[] { new Boolean(true) };
+    }
 }
+

@@ -33,7 +33,18 @@ import icbm.classic.api.explosion.ILauncherContainer;
 import icbm.classic.api.explosion.ILauncherController;
 import icbm.classic.api.explosion.LauncherType;
 
-public class TileCruiseLauncher extends TileLauncherPrefab implements IPacketIDReceiver, ILauncherController, ILauncherContainer, IGuiTile, IInventoryProvider<ExternalInventory>
+import java.util.Map;
+import java.util.HashMap;
+
+import net.minecraftforge.fml.common.Optional;
+
+import li.cil.oc.api.network.SimpleComponent;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+
+@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers", striprefs = true)
+public class TileCruiseLauncher extends TileLauncherPrefab implements IPacketIDReceiver, ILauncherController, ILauncherContainer, IGuiTile, IInventoryProvider<ExternalInventory>, SimpleComponent
 {
     /** Desired aim angle, updated every tick if target != null */
     protected final EulerAngle aim = new EulerAngle(0, 0, 0);
@@ -398,5 +409,65 @@ public class TileCruiseLauncher extends TileLauncherPrefab implements IPacketIDR
     public Object getClientGuiElement(int ID, EntityPlayer player)
     {
         return new GuiCruiseLauncher(player, this);
+    }
+
+    // ------------------------------------------------------------------------
+    // OpenComputers Integration Methods
+
+    @Override
+    public String getComponentName() {
+        return "cruise_launcher";
+    }
+
+    @Callback(doc = "function():boolean -- Returns if the launcher is able to launch.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] canLaunch(Context c, Arguments a)
+    {
+        return new Object[] { new Boolean(canLaunch()) };
+    }
+
+    @Callback(doc = "function():boolean -- Calls the missile launcher base to launch it's missile towards a targeted location.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] launch(Context c, Arguments a)
+    {
+        launch();
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function():string -- Gets the display status of the missile launcher.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getStatus(Context c, Arguments a) {
+        return new Object[] { getStatus() };
+    }
+
+    @Callback(doc = "function():table -- Gets the target.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getTarget(Context c, Arguments a) {
+        Map m = new HashMap<String, Integer>();
+
+        Pos p = getTarget();
+
+        m.put("x", p.xi());
+        m.put("y", p.yi());
+        m.put("z", p.zi());
+
+        return new Object[] { m };
+    }
+
+    @Callback(doc = "function(table):boolean -- Sets the target.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setTarget(Context c, Arguments a) {
+        Map m = a.checkTable(0);
+        setTarget(new Pos((double)m.get("x"), (double)m.get("y"), (double)m.get("z")));
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function(table):boolean -- Returns if the current target is too close to the launcher.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] isTooClose(Context c, Arguments a) {
+        Map m = a.checkTable(0);
+        return new Object[] { new Boolean(isTooClose(new Pos((double)m.get("x"), (double)m.get("y"), (double)m.get("z")))) };
     }
 }

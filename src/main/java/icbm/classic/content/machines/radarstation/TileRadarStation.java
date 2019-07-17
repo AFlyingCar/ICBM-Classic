@@ -31,7 +31,18 @@ import net.minecraft.world.World;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileRadarStation extends TileFrequency implements IPacketIDReceiver, IRadioWaveSender, IGuiTile, IInventoryProvider<ExternalInventory>
+import java.util.Map;
+import java.util.HashMap;
+
+import net.minecraftforge.fml.common.Optional;
+
+import li.cil.oc.api.network.SimpleComponent;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+
+@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers", striprefs = true)
+public class TileRadarStation extends TileFrequency implements IPacketIDReceiver, IRadioWaveSender, IGuiTile, IInventoryProvider<ExternalInventory>, SimpleComponent
 {
     /** Max range the radar station will attempt to find targets inside */
     public final static int MAX_DETECTION_RANGE = 500;
@@ -424,5 +435,147 @@ public class TileRadarStation extends TileFrequency implements IPacketIDReceiver
     public Object getClientGuiElement(int ID, EntityPlayer player)
     {
         return new GuiRadarStation(player, this);
+    }
+
+    // ------------------------------------------------------------------------
+    // OpenComputers Integration Methods
+
+    private void fillEntityMapping(Map<String, Object> m, Entity e) {
+        m.put("chunkCoordX", e.chunkCoordX);
+        m.put("chunkCoordY", e.chunkCoordY);
+        m.put("chunkCoordZ", e.chunkCoordZ);
+
+        m.put("dimension", e.dimension);
+        m.put("height", e.height);
+        m.put("isAirBorne", e.isAirBorne);
+
+        m.put("motionX", e.motionX);
+        m.put("motionY", e.motionY);
+        m.put("motionZ", e.motionZ);
+
+        m.put("posX", e.posX);
+        m.put("posY", e.posY);
+        m.put("posZ", e.posZ);
+
+        m.put("distance", e.getDistance(getPos().getX(), getPos().getY(), getPos().getZ()));
+
+        m.put("isBeingRidden", e.isBeingRidden());
+    }
+
+    private Map<String, Object> posToMap(Pos p) {
+        Map<String, Object> m = new HashMap<String, Object>();
+
+        m.put("x", p.xi());
+        m.put("y", p.yi());
+        m.put("z", p.zi());
+
+        return m;
+    }
+
+    private Pos mapToPos(Map<String, Object> m) {
+        return new Pos((double)m.get("x"), (double)m.get("y"), (double)m.get("z"));
+    }
+
+    @Override
+    public String getComponentName() {
+        return "radar_station";
+    }
+
+    @Callback(doc = "function():number -- Gets the maximum range that a missile can be in order to be detected.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getAlarmRange(Context c, Arguments a) {
+        return new Object[] { new Integer(alarmRange) };
+    }
+
+    @Callback(doc = "function(number):boolean -- Sets the maximum range that a missile can be in order to be detected.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setAlarmRange(Context c, Arguments a) {
+        alarmRange = a.checkInteger(0);
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function(number):boolean -- Gets the maximum range that a missile can be before an redstone signal is fired.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getSafetyRange(Context c, Arguments a) {
+        return new Object[] { new Integer(safetyRange) };
+    }
+
+    @Callback(doc = "function(number):boolean -- Sets the maximum range that a missile can be before an redstone signal is fired.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] setSafetyRange(Context c, Arguments a) {
+        safetyRange = a.checkInteger(0);
+
+        return new Object[] { new Boolean(true) };
+    }
+
+    @Callback(doc = "function():table -- Gets the position of the radar station in the world.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getPos(Context c, Arguments a) {
+        return new Object[] { posToMap(new Pos(this.pos.getX(), this.pos.getY(), this.pos.getZ())) };
+    }
+
+    @Callback(doc = "function():table -- Returns all entities detected by this radar station.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getDetectedEntities(Context c, Arguments a) {
+        Map<Integer, Map<String, Object>> m = new HashMap<Integer, Map<String, Object>>();
+
+        for(int i = 0; i < detectedEntities.size(); ++i) {
+            m.put(i, new HashMap<String, Object>());
+
+            m.get(i).put("__ptr", detectedEntities.get(i));
+
+            fillEntityMapping(m.get(i), detectedEntities.get(i));
+        }
+
+        return new Object[] { m };
+    }
+
+    @Callback(doc = "function():table -- Returns all incoming missiles, in order of distance.")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] getIncomingMissiles(Context c, Arguments a) {
+        Map<Integer, Map<String, Object>> m = new HashMap<Integer, Map<String, Object>>();
+
+        for(int i = 0; i < incomingMissiles.size(); ++i) {
+            m.put(i, new HashMap<String, Object>());
+
+            m.get(i).put("__ptr", incomingMissiles.get(i));
+
+            fillEntityMapping(m.get(i), incomingMissiles.get(i));
+
+            m.get(i).put("velocity", posToMap(incomingMissiles.get(i).getVelocity()));
+            m.get(i).put("explosiveID", incomingMissiles.get(i).explosiveID);
+            m.get(i).put("maxHeight", incomingMissiles.get(i).maxHeight);
+            m.get(i).put("targetPos", posToMap(incomingMissiles.get(i).targetPos));
+            m.get(i).put("launcherPos", posToMap(incomingMissiles.get(i).launcherPos));
+            m.get(i).put("acceleration", incomingMissiles.get(i).acceleration);
+        }
+
+        return new Object[] { m };
+    }
+
+    @Callback(doc = "function(table):boolean -- Returns true if the given missile is going to hit")
+    @Optional.Method(modid = "opencomputers")
+    public Object[] isMissileGoingToHit(Context c, Arguments a) {
+        // NOTE: Because we can't just give Lua a EntityMissile and expect to get
+        //   it back, we just repeat the code listed there in the real isMissileGoingToHit method
+        Map<String, Object> missile = a.checkTable(0);
+
+        if (missile.get("targetPos") == null)
+        {
+            Vec3d mpos = new Vec3d((double)missile.get("posX"), (double)missile.get("posY"), (double)missile.get("posZ"));    // missile position
+            Vec3d rpos = new Vec3d(this.pos.getX(),this.pos.getY(), this.pos.getZ());   // radar position
+
+            double nextDistance = mpos.add(mapToPos((Map<String, Object>)missile.get("velocity")).toVec3d()).distanceTo(rpos);   // next distance from missile to radar
+            double currentDistance = mpos.distanceTo(rpos); // current distance from missile to radar
+
+            // we assume that the missile hits if the distance decreases (the missile is coming closer)
+            return new Object[] { new Boolean(nextDistance < currentDistance) };
+        }
+
+        double d = mapToPos((Map<String, Object>)missile.get("targetPos")).distance(this);
+        //TODO simplify code to not use vector system
+        return new Object[] { new Boolean(d < this.safetyRange) };
+
     }
 }
