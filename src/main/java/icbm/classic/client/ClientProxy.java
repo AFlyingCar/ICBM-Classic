@@ -6,6 +6,7 @@ import icbm.classic.client.fx.ParticleSmokeICBM;
 import icbm.classic.client.render.entity.*;
 import icbm.classic.content.entity.*;
 import icbm.classic.content.entity.mobs.*;
+import icbm.classic.content.explosive.tile.BlockPotionExplosive;
 import icbm.classic.content.machines.launcher.cruise.TESRCruiseLauncher;
 import icbm.classic.content.machines.launcher.cruise.TileCruiseLauncher;
 import icbm.classic.content.missile.EntityMissile;
@@ -167,6 +168,13 @@ public class ClientProxy extends CommonProxy
                 String properties_string = getPropertyString(state.getProperties());
                 ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ICBMClassic.blockExplosive), ex.ordinal(), new ModelResourceLocation(resourcePath, properties_string));
             }
+        }
+
+        if(Explosives.POTION.handler.hasBlockForm()) {
+            final String potionResourcePath = ICBMClassic.blockPotionExplosive.getRegistryName().toString();
+            IBlockState state = ICBMClassic.blockPotionExplosive.getDefaultState().withProperty(BlockPotionExplosive.EX_PROP, Explosives.POTION).withProperty(BlockICBM.ROTATION_PROP, EnumFacing.UP);
+            String properties_string = getPropertyString(state.getProperties());
+            ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(ICBMClassic.blockPotionExplosive), Explosives.POTION.ordinal(), new ModelResourceLocation(potionResourcePath, properties_string));
         }
     }
 
