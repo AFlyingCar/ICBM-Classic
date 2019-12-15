@@ -12,6 +12,7 @@ import icbm.classic.config.ConfigMissile;
 import icbm.classic.content.explosive.Explosive;
 import icbm.classic.content.explosive.Explosives;
 import icbm.classic.content.explosive.handlers.Explosion;
+import icbm.classic.content.machines.launcher.base.TileLauncherBase;
 import icbm.classic.lib.emp.CapabilityEMP;
 import icbm.classic.lib.radar.RadarRegistry;
 import icbm.classic.lib.transform.vector.Pos;
@@ -23,6 +24,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -100,6 +103,7 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
     public NBTTagCompound nbtData = new NBTTagCompound();
 
     public IEMPReceiver capabilityEMP;
+    private PotionEffect effect;
 
     final int maxPreLaunchSmokeTimer = 50;
     public int preLaunchSmokeTimer = maxPreLaunchSmokeTimer;
@@ -224,6 +228,8 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
     @Override
     public void launch(Pos target)
     {
+        findPotionEffect(world, x(), y(), z());
+
         //Start motion
         if (ticksInAir <= 0)
         {
@@ -778,7 +784,17 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
     {
         if (!this.isExploding && !this.world.isRemote)
         {
-            EntityItem entityItem = new EntityItem(this.world, this.posX, this.posY, this.posZ, new ItemStack(ICBMClassic.itemMissile, 1, this.explosiveID.ordinal()));
+            EntityItem entityItem;
+
+            if(this.explosiveID == Explosives.POTION) {
+                ItemStack stack = new ItemStack(ICBMClassic.itemPotionMissile, 1, this.explosiveID.ordinal());
+                stack.setItemDamage(Explosives.POTION.ordinal());
+                PotionUtils.addPotionToItemStack(stack, PotionUtils.getPotionFromItem(stack));
+                PotionUtils.appendEffects(stack, PotionUtils.getFullEffectsFromItem(stack));
+                entityItem = new EntityItem(this.world, this.posX, this.posY, this.posZ, stack);
+            } else {
+                entityItem = new EntityItem(this.world, this.posX, this.posY, this.posZ, new ItemStack(ICBMClassic.itemMissile, 1, this.explosiveID.ordinal()));
+            }
 
             float var13 = 0.05F;
             Random random = new Random();
@@ -806,6 +822,11 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         this.missileType = MissileFlightType.get(nbt.getInteger("missileType"));
         this.preLaunchSmokeTimer = nbt.getInteger("preLaunchSmokeTimer");
         this.nbtData = nbt.getCompoundTag("additionalMissileData");
+
+        if(nbt.hasKey("effect")) {
+            NBTTagCompound effectTag = nbt.getCompoundTag("effect");
+            effect = PotionEffect.readCustomPotionEffectFromNBT(effectTag);
+        }
     }
 
     /** (abstract) Protected helper method to write subclass entity additionalMissileData to NBT. */
@@ -831,6 +852,12 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         nbt.setInteger("missileType", this.missileType.ordinal());
         nbt.setInteger("preLaunchSmokeTimer", this.preLaunchSmokeTimer);
         nbt.setTag("additionalMissileData", this.nbtData);
+
+        if(effect != null) {
+            NBTTagCompound effectTag = new NBTTagCompound();
+            effect.writeCustomPotionEffectToNBT(effectTag);
+            nbt.setTag("effect", effectTag);
+        }
     }
 
     @Override
@@ -856,4 +883,22 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
         return this.targetChunks;
     }
 
+    private void findPotionEffect(World world, double x, double y, double z) {
+        TileEntity te = world.getTileEntity(launcherPos.toBlockPos());
+
+        if(te instanceof TileLauncherBase) {
+            TileLauncherBase tlb = (TileLauncherBase)te;
+
+            ItemStack stack = tlb.getMissileStack();
+
+            if(stack.getItemDamage() == Explosives.POTION.ordinal()) {
+                List<PotionEffect> effects = PotionUtils.getEffectsFromStack(stack);
+                effect = effects.isEmpty() ? null : effects.get(0);
+            }
+        }
+    }
+
+    public PotionEffect getEffect() {
+        return effect;
+    }
 }
