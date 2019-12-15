@@ -59,7 +59,8 @@ public enum Explosives implements IStringSerializable
 
 
     /* 29 */XMAS_ZOMBIE(new ExXMAS(true)),
-    /* 30 */XMAS_SKELETON(new ExXMAS(false));
+    /* 30 */XMAS_SKELETON(new ExXMAS(false)),
+    /* 31 */POTION(new ExPotion("potion", EnumTier.ONE));
 
     public final Explosive handler;
 

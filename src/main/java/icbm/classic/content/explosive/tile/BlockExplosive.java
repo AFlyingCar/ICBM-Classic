@@ -34,7 +34,11 @@ public class BlockExplosive extends BlockICBM
 
     public BlockExplosive()
     {
-        super("explosives", Material.TNT);
+        this("explosives", Material.TNT);
+    }
+
+    public BlockExplosive(String name, Material mat) {
+        super(name, mat);
         setHardness(2);
         setSoundType(SoundType.CLOTH);
     }
