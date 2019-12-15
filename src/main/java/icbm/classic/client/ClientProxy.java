@@ -231,13 +231,19 @@ public class ClientProxy extends CommonProxy
         {
             if (ex.handler.hasMissileForm())
             {
+                Item item;
+                if(ex == Explosives.POTION)
+                    item = ICBMClassic.itemPotionMissile;
+                else
+                    item = ICBMClassic.itemMissile;
+
                 if (ex.handler instanceof Missile)
                 {
-                    ModelLoader.setCustomModelResourceLocation(ICBMClassic.itemMissile, ex.ordinal(), new ModelResourceLocation(resourcePath, "explosive=" + ex.getName()));
+                    ModelLoader.setCustomModelResourceLocation(item, ex.ordinal(), new ModelResourceLocation(resourcePath, "explosive=" + ex.getName()));
                 }
                 else
                 {
-                    ModelLoader.setCustomModelResourceLocation(ICBMClassic.itemMissile, ex.ordinal(), new ModelResourceLocation(resourcePath + "_" + (ex.handler.getTier().ordinal() + 1), "explosive=" + ex.getName()));
+                    ModelLoader.setCustomModelResourceLocation(item, ex.ordinal(), new ModelResourceLocation(resourcePath + "_" + (ex.handler.getTier().ordinal() + 1), "explosive=" + ex.getName()));
                 }
             }
         }
