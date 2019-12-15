@@ -13,6 +13,7 @@ import icbm.classic.content.explosive.Explosive;
 import icbm.classic.content.explosive.Explosives;
 import icbm.classic.content.explosive.handlers.Explosion;
 import icbm.classic.content.machines.launcher.base.TileLauncherBase;
+import icbm.classic.content.machines.launcher.cruise.TileCruiseLauncher;
 import icbm.classic.lib.emp.CapabilityEMP;
 import icbm.classic.lib.radar.RadarRegistry;
 import icbm.classic.lib.transform.vector.Pos;
@@ -885,16 +886,17 @@ public class EntityMissile extends EntityProjectile implements IEntityAdditional
 
     private void findPotionEffect(World world, double x, double y, double z) {
         TileEntity te = world.getTileEntity(launcherPos.toBlockPos());
+        ItemStack stack = ItemStack.EMPTY;
 
         if(te instanceof TileLauncherBase) {
-            TileLauncherBase tlb = (TileLauncherBase)te;
+            stack = ((TileLauncherBase)te).getMissileStack();
+        } else if(te instanceof TileCruiseLauncher) {
+            stack = ((TileCruiseLauncher)te).getInventory().getStackInSlot(0);
+        }
 
-            ItemStack stack = tlb.getMissileStack();
-
-            if(stack.getItemDamage() == Explosives.POTION.ordinal()) {
-                List<PotionEffect> effects = PotionUtils.getEffectsFromStack(stack);
-                effect = effects.isEmpty() ? null : effects.get(0);
-            }
+        if(!stack.isEmpty() && stack.getItemDamage() == Explosives.POTION.ordinal()) {
+            List<PotionEffect> effects = PotionUtils.getEffectsFromStack(stack);
+            effect = effects.isEmpty() ? null : effects.get(0);
         }
     }
 
