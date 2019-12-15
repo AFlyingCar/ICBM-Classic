@@ -84,7 +84,10 @@ public enum Explosives implements IStringSerializable
     {
         if (handler instanceof Missile)
         {
-            return new ItemStack(ICBMClassic.itemMissile, amount, ordinal());
+            if(this == POTION)
+                return new ItemStack(ICBMClassic.itemPotionMissile, amount, ordinal());
+            else
+                return new ItemStack(ICBMClassic.itemMissile, amount, ordinal());
         }
         return new ItemStack(ICBMClassic.blockExplosive, amount, ordinal());
     }
