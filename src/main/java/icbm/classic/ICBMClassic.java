@@ -9,6 +9,7 @@ import icbm.classic.content.entity.mobs.*;
 import icbm.classic.content.explosive.Explosives;
 import icbm.classic.content.explosive.thread2.WorkerThreadManager;
 import icbm.classic.content.explosive.tile.BlockExplosive;
+import icbm.classic.content.explosive.tile.BlockPotionExplosive;
 import icbm.classic.content.explosive.tile.ItemBlockExplosive;
 import icbm.classic.content.explosive.tile.TileEntityExplosive;
 import icbm.classic.content.items.*;
@@ -33,6 +34,7 @@ import icbm.classic.content.potion.ContagiousPoison;
 import icbm.classic.content.potion.PoisonContagion;
 import icbm.classic.content.potion.PoisonFrostBite;
 import icbm.classic.content.potion.PoisonToxin;
+import icbm.classic.content.recipes.PotionExplosiveRecipe;
 import icbm.classic.lib.emp.CapabilityEMP;
 import icbm.classic.lib.energy.system.EnergySystem;
 import icbm.classic.lib.energy.system.EnergySystemFE;
@@ -72,6 +74,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.*;
@@ -82,6 +85,8 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.registries.GameData;
+import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -148,6 +153,7 @@ public final class ICBMClassic
     public static Block blockConcrete;
     public static Block blockReinforcedGlass;
     public static Block blockExplosive;
+    public static Block blockPotionExplosive;
 
     public static Block blockLaunchBase;
     public static Block blockLaunchScreen;
@@ -219,6 +225,7 @@ public final class ICBMClassic
         event.getRegistry().register(new ItemBlockSubTypes(blockConcrete));
         event.getRegistry().register(new ItemBlock(blockReinforcedGlass).setRegistryName(blockReinforcedGlass.getRegistryName()));
         event.getRegistry().register(new ItemBlockExplosive(blockExplosive).setRegistryName(blockExplosive.getRegistryName()));
+        event.getRegistry().register(new ItemBlockExplosive(blockPotionExplosive).setRegistryName(blockPotionExplosive.getRegistryName()));
         event.getRegistry().register(new ItemBlock(blockEmpTower).setRegistryName(blockEmpTower.getRegistryName()));
         event.getRegistry().register(new ItemBlock(blockRadarStation).setRegistryName(blockRadarStation.getRegistryName()));
         event.getRegistry().register(new ItemBlockSubTypes(blockLaunchSupport));
@@ -273,6 +280,7 @@ public final class ICBMClassic
         event.getRegistry().register(blockReinforcedGlass = new BlockReinforcedGlass());
         //event.getRegistry().register(blockCombatRail = new BlockReinforcedRail());
         event.getRegistry().register(blockExplosive = new BlockExplosive());
+        event.getRegistry().register(blockPotionExplosive = new BlockPotionExplosive());
 
         event.getRegistry().register(blockEmpTower = new BlockEmpTower());
         event.getRegistry().register(blockRadarStation = new BlockRadarStation());
@@ -369,6 +377,8 @@ public final class ICBMClassic
             //Fix for removing recipe of plate
             GameRegistry.addSmelting(itemPlate.getStack("iron", 1), new ItemStack(Items.IRON_INGOT), 0f);
         }
+
+        // event.getRegistry().register(potionRecipe);
     }
 
     @SubscribeEvent
