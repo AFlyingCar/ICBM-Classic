@@ -31,7 +31,6 @@ import icbm.classic.content.potion.ContagiousPoison;
 import icbm.classic.content.potion.PoisonContagion;
 import icbm.classic.content.potion.PoisonFrostBite;
 import icbm.classic.content.potion.PoisonToxin;
-import icbm.classic.content.recipes.PotionExplosiveRecipe;
 import icbm.classic.lib.emp.CapabilityEMP;
 import icbm.classic.lib.energy.system.EnergySystem;
 import icbm.classic.lib.energy.system.EnergySystemFE;
@@ -71,7 +70,6 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.*;
@@ -82,8 +80,6 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.oredict.OreDictionary;
-import net.minecraftforge.registries.GameData;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -170,6 +166,7 @@ public final class ICBMClassic
     public static Item itemSignalDisrupter;
     public static Item itemTracker;
     public static Item itemMissile;
+    public static Item itemPotionMissile;
     public static Item itemDefuser;
     public static Item itemRadarGun;
     public static Item itemRemoteDetonator;
@@ -214,6 +211,7 @@ public final class ICBMClassic
         event.getRegistry().register(itemLaserDesignator = new ItemLaserDetonator());
         event.getRegistry().register(itemRocketLauncher = new ItemRocketLauncher());
         event.getRegistry().register(itemMissile = new ItemMissile());
+        event.getRegistry().register(itemPotionMissile = new ItemPotionMissile());
 
         //Block items
         event.getRegistry().register(new ItemBlock(blockGlassPlate).setRegistryName(blockGlassPlate.getRegistryName()));
