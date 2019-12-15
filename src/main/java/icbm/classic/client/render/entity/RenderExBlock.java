@@ -2,6 +2,7 @@ package icbm.classic.client.render.entity;
 
 import icbm.classic.ICBMClassic;
 import icbm.classic.content.entity.EntityExplosive;
+import icbm.classic.content.explosive.Explosives;
 import icbm.classic.content.explosive.tile.BlockExplosive;
 import icbm.classic.prefab.tile.BlockICBM;
 import net.minecraft.block.state.IBlockState;
@@ -39,7 +40,13 @@ public class RenderExBlock extends Render<EntityExplosive>
 
     public void renderBlock(EntityExplosive entity, double x, double y, double z, float entityYaw, float partialTicks)
     {
-        final IBlockState blockState = ICBMClassic.blockExplosive.getDefaultState()
+        final IBlockState blockState;
+        if(entity.explosiveID == Explosives.POTION)
+            blockState = ICBMClassic.blockPotionExplosive.getDefaultState()
+                    .withProperty(BlockICBM.ROTATION_PROP, EnumFacing.UP) //TODO get direction from rotation
+                    .withProperty(BlockExplosive.EX_PROP, entity.explosiveID);
+        else
+            blockState = ICBMClassic.blockExplosive.getDefaultState()
                 .withProperty(BlockICBM.ROTATION_PROP, EnumFacing.UP) //TODO get direction from rotation
                 .withProperty(BlockExplosive.EX_PROP, entity.explosiveID);
         final BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
