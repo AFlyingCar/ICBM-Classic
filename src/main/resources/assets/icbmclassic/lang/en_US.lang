@@ -136,6 +136,8 @@ icbm.explosive.redMatter.name=Red Matter Explosives
 
 icbm.explosive.sMine.name=S-Mine
 
+icbm.explosive.potion.name=Potion Explosives
+
 ## Explosive Info
 icbm.explosive.condensed.info=Slightly more destructive version of TNT
 icbm.explosive.shrapnel.info=Erupts in a barrage of metal fragments
@@ -162,6 +164,8 @@ icbm.explosive.ender.info=Lets relocate that base of yours
 icbm.explosive.hypersonic.info=I feel bad for your ears
 
 icbm.explosive.antimatter.info=matter + antimatter = no matter
+
+icbm.explosive.potion.info=Bubble bubble toil and trouble!
 
 icbm.explosive.xmas.info=No, don't do it, he's evil!
 
