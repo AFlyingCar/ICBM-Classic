@@ -231,7 +231,7 @@ public class TileLauncherBase extends TileMachine implements IMultiTileHost, ILa
     public boolean launchMissile(Pos target, int lockHeight)
     {
         final ItemStack stack = getMissileStack();
-        if (stack.getItem() == ICBMClassic.itemMissile)
+        if (stack.getItem() == ICBMClassic.itemMissile || stack.getItem() == ICBMClassic.itemPotionMissile)
         {
             Explosive ex = Explosives.get(stack.getItemDamage()).handler;
             if (ex.hasMissileForm())

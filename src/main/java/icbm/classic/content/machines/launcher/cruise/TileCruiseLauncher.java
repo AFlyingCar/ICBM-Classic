@@ -25,6 +25,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -92,7 +93,7 @@ public class TileCruiseLauncher extends TileLauncherPrefab implements IPacketIDR
         {
             status = LanguageUtility.getLocal("gui.launcherCruise.statusEmpty");
         }
-        else if (this.getInventory().getStackInSlot(0).getItem() != ICBMClassic.itemMissile)
+        else if (this.getInventory().getStackInSlot(0).getItem() != ICBMClassic.itemMissile && this.getInventory().getStackInSlot(0).getItem() != ICBMClassic.itemPotionMissile )
         {
             status = LanguageUtility.getLocal("gui.launcherCruise.invalidMissile");
         }
@@ -278,7 +279,7 @@ public class TileCruiseLauncher extends TileLauncherPrefab implements IPacketIDR
         if (getTarget() != null && !getTarget().isZero())
         {
             //Validate if we have an item and a target
-            if (this.getInventory().getStackInSlot(0) != null && this.getInventory().getStackInSlot(0).getItem() == ICBMClassic.itemMissile)
+            if (this.getInventory().getStackInSlot(0) != null && (this.getInventory().getStackInSlot(0).getItem() == ICBMClassic.itemMissile || this.getInventory().getStackInSlot(0).getItem() == ICBMClassic.itemPotionMissile))
             {
                 //Validate that the item in the slot is a missile we can fire
                 final Explosion missile = (Explosion) Explosives.get(this.getInventory().getStackInSlot(0).getItemDamage()).handler;
@@ -340,6 +341,7 @@ public class TileCruiseLauncher extends TileLauncherPrefab implements IPacketIDR
             entityMissile.missileType = MissileFlightType.CRUISE_LAUNCHER;
             entityMissile.explosiveID = Explosives.get(this.getInventory().getStackInSlot(0).getItemDamage());
             entityMissile.acceleration = 1;
+            entityMissile.launcherPos = new Pos((TileEntity) this);
             entityMissile.launch(null);
             world.spawnEntity(entityMissile);
             //Clear slot last so we can still access data as needed or roll back changes if a crash happens
