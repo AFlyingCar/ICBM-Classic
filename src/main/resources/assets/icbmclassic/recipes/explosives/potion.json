@@ -1,0 +1,20 @@
+{
+  "_comment": [
+    "Crafts a potion explosive (shapeless), requires 1 potion and 1 condensed explosive"
+  ],
+  "result": {
+    "item": "icbmclassic:explosives",
+    "data": 31,
+    "count": 1
+  },
+  "type": "icbmclassic:expotion_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:potion"
+    },
+    {
+      "item": "icbmclassic:explosives",
+      "data": 0
+    }
+  ]
+}
