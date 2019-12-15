@@ -19,7 +19,12 @@ public class ItemMissile extends ItemICBMBase
 {
     public ItemMissile()
     {
-        super("missile");
+        this("missile");
+    }
+
+    public ItemMissile(String name) {
+
+        super(name);
         this.setMaxDamage(0);
         this.setHasSubtypes(true);
         this.setMaxStackSize(1);
