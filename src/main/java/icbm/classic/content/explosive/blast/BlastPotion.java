@@ -12,6 +12,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import java.util.List;
+import java.util.Set;
 
 public class BlastPotion extends Blast {
     public static final int PARTICLES_TO_SPAWN = 200; // TODO: Add to a config
@@ -26,6 +27,8 @@ public class BlastPotion extends Blast {
     private boolean playShortSoundFX;
     private boolean isMutate;
     private PotionEffect potionEffect;
+
+    private Set<EntityLivingBase> appliedEntities;
 
     public BlastPotion(World world, Entity entity, double x, double y, double z, float size)
     {
@@ -73,7 +76,7 @@ public class BlastPotion extends Blast {
 
         if(potionEffect != null) {
             for(EntityLivingBase entity : allEntities) {
-                entity.addPotionEffect(potionEffect);
+                entity.addPotionEffect(new PotionEffect(potionEffect.getPotion(), 20 * 30, potionEffect.getAmplifier(), potionEffect.getIsAmbient(), potionEffect.doesShowParticles()));
             }
         }
 
@@ -82,6 +85,10 @@ public class BlastPotion extends Blast {
 
         if(callCount > duration)
             controller.endExplosion();
+    }
+
+    @Override
+    public void doPostExplode() {
     }
 
     protected void generateAudioEffect() {
@@ -123,8 +130,9 @@ public class BlastPotion extends Blast {
         blue = nbt.getFloat("blue");
         playShortSoundFX = nbt.getBoolean("playShortSoundFX");
 
-        if(nbt.hasKey("effect"))
-            potionEffect = PotionUtils.getEffectsFromTag(nbt.getCompoundTag("effect")).get(0);
+        if(nbt.hasKey("effect")) {
+            potionEffect = PotionEffect.readCustomPotionEffectFromNBT(nbt.getCompoundTag("effect"));
+        }
     }
 
     @Override
