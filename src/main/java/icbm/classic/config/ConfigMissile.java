@@ -35,8 +35,8 @@ public class ConfigMissile
     @Config.RangeInt(min = 1)
     public static int SIMULATION_START_HEIGHT = 300;
 
-    @Config.Name("")
-    @Config.Comment("")
+    @Config.Name("missile_chunkload_radius")
+    @Config.Comment("Radius around a missile that will be chunkloaded")
     @Config.RangeInt(min=1, max=6)
     public static int MISSILE_CHUNKLOAD_RADIUS = 3;
 }
