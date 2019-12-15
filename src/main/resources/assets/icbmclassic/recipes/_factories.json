@@ -3,6 +3,7 @@
     "ore_value": "icbm.classic.lib.recipe.ConditionOreValue"
   },
   "recipes": {
-    "expotion_shapeless": "icbm.classic.content.recipes.PotionExplosiveRecipe$Factory"
+    "expotion_shapeless": "icbm.classic.content.recipes.PotionExplosiveRecipe$Factory",
+    "missile_potion_shapeless": "icbm.classic.content.recipes.PotionMissileRecipe$Factory"
   }
 }
