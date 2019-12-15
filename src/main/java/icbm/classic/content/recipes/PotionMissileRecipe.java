@@ -67,7 +67,7 @@ public class PotionMissileRecipe extends ShapelessOreRecipe {
 
         if(potionBlockStack.isEmpty()) return ItemStack.EMPTY;
 
-        ItemStack potionMissileStack = new ItemStack(ICBMClassic.itemMissile, 1);
+        ItemStack potionMissileStack = new ItemStack(ICBMClassic.itemPotionMissile, 1);
         potionMissileStack.setItemDamage(Explosives.POTION.ordinal());
         PotionUtils.addPotionToItemStack(potionMissileStack, PotionUtils.getPotionFromItem(potionBlockStack));
         PotionUtils.appendEffects(potionMissileStack, PotionUtils.getFullEffectsFromItem(potionBlockStack));
