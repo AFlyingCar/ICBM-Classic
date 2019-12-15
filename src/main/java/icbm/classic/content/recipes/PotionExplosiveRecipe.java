@@ -63,6 +63,8 @@ public class PotionExplosiveRecipe extends ShapelessOreRecipe {
                     if(foundPotion) return false;
 
                     foundPotion = true;
+                } else {
+                    return false;
                 }
             }
         }
