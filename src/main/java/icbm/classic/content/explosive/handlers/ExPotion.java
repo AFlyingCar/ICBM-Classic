@@ -1,39 +1,50 @@
 package icbm.classic.content.explosive.handlers;
 
 import icbm.classic.ICBMClassic;
+import icbm.classic.content.entity.EntityBombCart;
 import icbm.classic.content.entity.EntityExplosive;
-import icbm.classic.content.explosive.blast.Blast;
+import icbm.classic.content.entity.EntityGrenade;
 import icbm.classic.content.explosive.blast.BlastPotion;
+import icbm.classic.content.missile.EntityMissile;
 import icbm.classic.prefab.tile.EnumTier;
 import net.minecraft.entity.Entity;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
-import java.util.List;
-import java.util.function.Supplier;
 
 public class ExPotion extends Explosion {
     public ExPotion(String mingZi, EnumTier tier) {
         super(mingZi, tier);
-
     }
 
     @Override
     public void doCreateExplosion(World world, BlockPos pos, Entity entity, float scale) {
-        EntityExplosive explosive = null;
-        if(entity instanceof EntityExplosive)
-            explosive = (EntityExplosive)entity;
-
-        if(explosive == null) {
-            System.err.println("Explosive is null! We cannot find the potion effect!");
-            return;
-        }
-
         PotionEffect effect = null;
-        if(explosive.nbtData.hasKey("effect"))
-            effect = PotionEffect.readCustomPotionEffectFromNBT(explosive.nbtData.getCompoundTag("effect"));
+        if(entity instanceof EntityExplosive) {
+            EntityExplosive explosive = (EntityExplosive)entity;
+
+            if(explosive.nbtData.hasKey("effect"))
+                effect = PotionEffect.readCustomPotionEffectFromNBT(explosive.nbtData.getCompoundTag("effect"));
+        } else if(entity instanceof EntityMissile) {
+            EntityMissile missile = (EntityMissile)entity;
+
+            effect = missile.getEffect();
+        } else if(entity instanceof EntityGrenade) {
+            EntityGrenade grenade = (EntityGrenade)entity;
+
+            if(grenade.nbtData.hasKey("effect"))
+                effect = PotionEffect.readCustomPotionEffectFromNBT(grenade.nbtData.getCompoundTag("effect"));
+        } else if(entity instanceof EntityBombCart) {
+            // TODO: We need a special EntityBombCart for potions
+            /*
+            EntityBombCart bombCart = (EntityBombCart)entity;
+
+            if(bombCart.nbtData.hasKey("effect"))
+                effect = PotionEffect.readCustomPotionEffectFromNBT(bombCart.nbtData.getCompoundTag("effect"));
+             */
+        } else {
+            ICBMClassic.logger().error("Entity does not match any known ICBM explosive device!");
+        }
 
         float r = 1, g = 1, b = 1;
         if(effect != null) {
