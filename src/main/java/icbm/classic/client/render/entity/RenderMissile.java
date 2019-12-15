@@ -107,7 +107,11 @@ public class RenderMissile extends Render<EntityMissile>
         entityItem.setWorld(world);
         entityItem.rotationYaw = 0;
         entityItem.setPosition(wx, wy, wz);
-        entityItem.setItem(new ItemStack(ICBMClassic.itemMissile, 1, ex.ordinal()));
+
+        if(ex == Explosives.POTION)
+            entityItem.setItem(new ItemStack(ICBMClassic.itemPotionMissile, 1, ex.ordinal()));
+        else
+            entityItem.setItem(new ItemStack(ICBMClassic.itemMissile, 1, ex.ordinal()));
 
         //render entity item
         renderEntityItem.doRender(entityItem, x, y, z, entityYaw, partialTicks);
