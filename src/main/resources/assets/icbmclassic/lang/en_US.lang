@@ -216,6 +216,8 @@ icbm.missile.redMatter.name=Red Matter Missile
 icbm.missile.xmas.zombie.name=Zombie Gift Missile
 icbm.missile.xmas.skeleton.name=Skeleton Gift Missile
 
+icbm.missile.potion.name=Potion Missile
+
 ## Special Missiles
 icbm.missile.missileModule.name=Missile Module
 icbm.missile.antiBallistic.name=Anti-ballistic Missile
