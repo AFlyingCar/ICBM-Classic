@@ -9,6 +9,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -76,7 +77,17 @@ public class BlastPotion extends Blast {
 
         if(potionEffect != null) {
             for(EntityLivingBase entity : allEntities) {
-                entity.addPotionEffect(new PotionEffect(potionEffect.getPotion(), 20 * 30, potionEffect.getAmplifier(), potionEffect.getIsAmbient(), potionEffect.doesShowParticles()));
+                // Same code as what happens when hit with a splash potion
+                if(entity.canBeHitWithPotion()) {
+                    double d1 = 1.0D - Math.sqrt(entity.getDistanceSq(this.getPos())) / 4.0D;
+                    if(potionEffect.getPotion().isInstant()) {
+                        potionEffect.getPotion().affectEntity(this.controller, null, entity, potionEffect.getAmplifier(), d1);
+                    } else {
+                        // int i = (int) (d1 * (double) potionEffect.getDuration() + 0.5D);
+                        // if(i > 20)
+                        entity.addPotionEffect(new PotionEffect(potionEffect.getPotion(), potionEffect.getDuration(), potionEffect.getAmplifier(), potionEffect.getIsAmbient(), potionEffect.doesShowParticles()));
+                    }
+                }
             }
         }
 
@@ -151,5 +162,10 @@ public class BlastPotion extends Blast {
             potionEffect.writeCustomPotionEffectToNBT(effectTag);
             nbt.setTag("effect", effectTag);
         }
+    }
+
+    @Override
+    public String toString() {
+        return (potionEffect != null ? I18n.translateToLocal(potionEffect.getEffectName()) : I18n.translateToLocal("effect.none")).trim();
     }
 }
