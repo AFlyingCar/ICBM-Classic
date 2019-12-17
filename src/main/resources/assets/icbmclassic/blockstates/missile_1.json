@@ -150,6 +150,9 @@
       },
       "missile_homing": {
         "model": "icbmclassic:missiles/tier1/missile_homing.obj"
+      },
+      "potion": {
+        "model": "icbmclassic:missiles/tier1/missile_potion.obj"
       }
     }
   }

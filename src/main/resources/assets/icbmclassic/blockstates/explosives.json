@@ -261,6 +261,17 @@
           "south": "icbmclassic:blocks/explosive_redmatter_side",
           "west": "icbmclassic:blocks/explosive_redmatter_side"
         }
+      },
+      "potion": {
+        "textures": {
+          "particle": "icbmclassic:blocks/explosive_base_1",
+          "down": "icbmclassic:blocks/explosive_bottom_1",
+          "up": "icbmclassic:blocks/explosive_potion_top",
+          "north": "icbmclassic:blocks/explosive_potion_side",
+          "east": "icbmclassic:blocks/explosive_potion_side",
+          "south": "icbmclassic:blocks/explosive_potion_side",
+          "west": "icbmclassic:blocks/explosive_potion_side"
+        }
       }
     },
     "rotation": {
