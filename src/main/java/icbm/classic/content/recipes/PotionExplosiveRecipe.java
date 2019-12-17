@@ -25,12 +25,9 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.IRecipeFactory;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-// public class PotionExplosiveRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe {
 public class PotionExplosiveRecipe extends ShapelessOreRecipe {
     public PotionExplosiveRecipe(ResourceLocation group, NonNullList<Ingredient> input, @Nonnull ItemStack result) {
         super(group, input, result);
@@ -118,7 +115,7 @@ public class PotionExplosiveRecipe extends ShapelessOreRecipe {
 
     @Override
     public ItemStack getRecipeOutput() {
-        return ItemStack.EMPTY;
+        return new ItemStack(Item.getItemFromBlock(ICBMClassic.blockPotionExplosive), 1);
     }
 
     @Override
